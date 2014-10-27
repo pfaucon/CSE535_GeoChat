@@ -7,9 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate>
 
+@property (strong, nonatomic) IBOutlet UITextField *messageTextField;
+@property (strong, nonatomic) IBOutlet UITableView *messageTable;
+
+- (IBAction)postMessage:(id)sender;
 
 @end
 
