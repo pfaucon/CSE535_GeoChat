@@ -18,6 +18,10 @@
     UIActivityIndicatorView *spinner;
 }
 
+@property (atomic) NSNumber *dataReady;
+@property (atomic) NSNumber *locationReady;
+@property (atomic) NSNumber *dataProcessed;
+
 @end
 
 @implementation ViewController
@@ -32,6 +36,9 @@
     // Init location manager
     locManager = [[CLLocationManager alloc] init];
     [locManager requestWhenInUseAuthorization];
+    locManager.delegate = self;
+    locManager.desiredAccuracy = kCLLocationAccuracyBest;
+    [locManager startUpdatingLocation];
     
     // Initialize the spinner.
     spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
@@ -45,60 +52,63 @@
     [self loadMessage];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return [messages count];
-}
-
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"post" forIndexPath:indexPath];
-
-    if(messages != nil)
-    {
-        cell.textLabel.text = [messages objectForKey:[messagesArray objectAtIndex:indexPath.row]][@"message"];
-    }
-    
-    return cell;
-}
-
 - (void)loadMessage
 {
     // Attach a block to read the data at our posts reference
     [db observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
         // Retrieving data from
         messages = snapshot.value;
+        messagesArray = [messages allKeys];
         
-#warning Need to fix this logic, it's trying to catch the the run-time error if no items exists on Firebase but does not work
-        if(messages != [NSNull null] || [messages count] > 0)
+        //we finished our part
+        @synchronized(self.dataReady)
         {
-            messagesArray = [messages allKeys];
-            [spinner stopAnimating];
-            [self.messageTable reloadData];
+            self.dataReady = [NSNumber numberWithBool:YES];
+        }
+        
+        //if the location is also ready then we can process the results
+        @synchronized(self.dataProcessed)
+        {
+            //if data was processed then we probably just got an update, so it doesn't matter
+            
+            @synchronized(self.locationReady)
+            {
+                //if the location has been loaded we can process messages!
+                if(self.locationReady)
+                {
+                    [self processMessages];
+                }
+            }
         }
         
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
     }];
-    
 }
 
 - (IBAction)postMessage:(id)sender {
-    locManager.delegate = self;
-    locManager.desiredAccuracy = kCLLocationAccuracyBest;
-    [locManager startUpdatingLocation];
     
-    [locManager startUpdatingLocation];
+    NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
+    
+    // Saving the location
+    NSNumber *lon = [[NSNumber alloc] initWithDouble:locManager.location.coordinate.longitude];
+    NSNumber *lat = [[NSNumber alloc] initWithDouble:locManager.location.coordinate.latitude];
+    NSDictionary *location = @{@"lon":lon,
+                               @"lat":lat};
+    
+    [message setObject:location forKey:@"location"];
+    
+    // Saving the message
+    [message setObject:self.messageTextField.text forKey:@"message"];
+    
+    Firebase *messageRef = [db childByAutoId];
+    
+    // Putting it up to Firebase
+    [messageRef setValue:message];
+    
 }
+
+#pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
@@ -125,26 +135,87 @@
     NSLog(@"didUpdateToLocation: %@", newLocation);
     
     if (newLocation != nil) {
-        NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
         
-        // Saving the location
-        NSNumber *lon = [[NSNumber alloc] initWithDouble:newLocation.coordinate.longitude];
-        NSNumber *lat = [[NSNumber alloc] initWithDouble:newLocation.coordinate.latitude];
-        NSDictionary *location = @{@"lon":lon,
-                                   @"lat":lat};
+        //we finished our part
+        @synchronized(self.locationReady)
+        {
+            self.locationReady = [NSNumber numberWithBool:YES];
+        }
         
-        [message setObject:location forKey:@"location"];
-        
-        // Saving the message
-        [message setObject:self.messageTextField.text forKey:@"message"];
-        
-        Firebase *messageRef = [db childByAutoId];
-        
-        // Putting it up to Firebase
-        [messageRef setValue:message];
-        [locManager stopUpdatingLocation];
+        //if the location is also ready then we can process the results
+        @synchronized(self.dataProcessed)
+        {
+            //if data was processed then we probably just got an update, so it doesn't matter
+            
+            @synchronized(self.dataReady)
+            {
+                //if the location has been loaded we can process messages!
+                if(self.dataReady)
+                {
+                    [self processMessages];
+                }
+            }
+        }
     }
     
-    [locManager stopUpdatingLocation];
 }
+
+#pragma mark - Data processing
+
+//careful with future updates here, we're holding mutexes
+-(void)processMessages
+{
+    messages = [self postsFromArray:messages InRangeOfLocation:locManager.location];
+    self.dataProcessed = [NSNumber numberWithBool:YES];
+    [spinner stopAnimating];
+    [self.messageTable reloadData];
+}
+
+//this should be a dictionary of JSON-parsed posts (should have a key location with lat/lon children)
+-(NSDictionary *)postsFromArray:(NSDictionary *)dict InRangeOfLocation:(CLLocation *)location
+{
+    NSMutableDictionary *ret = [dict mutableCopy];
+    for(NSString *key in dict)
+    {
+        NSDictionary *post = dict[key];
+        float lat = ((NSNumber *)post[@"location"][@"lat"]).floatValue;
+        float lon = ((NSNumber *)post[@"location"][@"lon"]).floatValue;
+        CLLocation *postLocation = [[CLLocation alloc] initWithLatitude:lat longitude:lon];
+        
+        //distance in meters
+        CLLocationDistance distance = [location distanceFromLocation:postLocation];
+        
+        if (distance > 2500)
+        {
+            NSLog(@"removing key %@, distance %f",key, distance);
+            [ret removeObjectForKey:key];
+        }
+    }
+    
+    return ret;
+}
+
+#pragma mark - UITableViewDataSource
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [messages count];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"post" forIndexPath:indexPath];
+    
+    if(messages != nil)
+    {
+        cell.textLabel.text = [messages objectForKey:[messagesArray objectAtIndex:indexPath.row]][@"message"];
+    }
+    
+    return cell;
+}
+
 @end
