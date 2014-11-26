@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "Temp": {
+            "applicationId": "FcA36waByxhXX3j7U58EfTWYtNmkMryH8kml4hvU", 
+            "masterKey": "GZw2NIW33NFrfVIueVuFreJweauX5iES3wHoOtIx"
+        }, 
+        "_default": {
+            "link": "Temp"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.3.1"
+    }
+}
