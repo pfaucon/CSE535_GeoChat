@@ -8,3 +8,9 @@ To get the project up and running:
 - cd to the directory
 - pod install
 - open the xcWORKSPACE 
+
+
+Cloud Code
+==============
+
+https://parse.com/docs/cloud_code_guide
