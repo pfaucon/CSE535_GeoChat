@@ -16,6 +16,7 @@
 		52AE781319FD99880092B701 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 52AE781119FD99880092B701 /* LaunchScreen.xib */; };
 		52AE781F19FD99880092B701 /* CSE535_ProjectTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 52AE781E19FD99880092B701 /* CSE535_ProjectTests.m */; };
 		81BB9E0683A73E75FE119053 /* libPods-CSE535_Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E1437020AC9955255B9756B /* libPods-CSE535_Project.a */; };
+		CEEDED1D1A2C105000FFA299 /* PSRLandingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEDED1C1A2C105000FFA299 /* PSRLandingViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,8 @@
 		52AE781819FD99880092B701 /* CSE535_ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CSE535_ProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		52AE781D19FD99880092B701 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52AE781E19FD99880092B701 /* CSE535_ProjectTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSE535_ProjectTests.m; sourceTree = "<group>"; };
+		CEEDED1B1A2C105000FFA299 /* PSRLandingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PSRLandingViewController.h; sourceTree = "<group>"; };
+		CEEDED1C1A2C105000FFA299 /* PSRLandingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PSRLandingViewController.m; sourceTree = "<group>"; };
 		DB933A6AB5F27F132F43EBB8 /* Pods-CSE535_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CSE535_Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CSE535_Project/Pods-CSE535_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -100,6 +103,8 @@
 		52AE780119FD99880092B701 /* CSE535_Project */ = {
 			isa = PBXGroup;
 			children = (
+				CEEDED1B1A2C105000FFA299 /* PSRLandingViewController.h */,
+				CEEDED1C1A2C105000FFA299 /* PSRLandingViewController.m */,
 				52AE780619FD99880092B701 /* AppDelegate.h */,
 				52AE780719FD99880092B701 /* AppDelegate.m */,
 				52AE780919FD99880092B701 /* ViewController.h */,
@@ -284,6 +289,7 @@
 			files = (
 				52AE780B19FD99880092B701 /* ViewController.m in Sources */,
 				52AE780819FD99880092B701 /* AppDelegate.m in Sources */,
+				CEEDED1D1A2C105000FFA299 /* PSRLandingViewController.m in Sources */,
 				52AE780519FD99880092B701 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

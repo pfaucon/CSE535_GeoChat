@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import <Firebase/Firebase.h>
+#import "AppDelegate.h"
 
 #define kMessageDirectory @"Messages"
 
@@ -23,6 +24,7 @@
 
 @property (nonatomic) NSMutableArray *messagesArray;
 @property Firebase *db;
+@property AppDelegate *delegate;
 
 @end
 
@@ -32,8 +34,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    //get a reference to the app delegate
+    self.delegate = [[UIApplication sharedApplication] delegate];
+    
     // Create a reference to a Firebase location
     self.db = [[Firebase alloc] initWithUrl:@"https://cse535-project.firebaseio.com/"];
+    [[[self.db childByAppendingPath:@"users"]
+      childByAppendingPath:self.delegate.userId] setValue:self.delegate.currentUserInfo];
     
     // Init location manager
     locManager = [[CLLocationManager alloc] init];
@@ -104,7 +111,8 @@
     
     // Saving the message
     message[@"message"] = self.messageTextField.text;
-    message[@"timestamp"] = [NSDate new];
+    message[@"timestamp"] = [[NSDate new] description];
+    message[@"username"] = self.delegate.currentUserInfo[@"email"];
     
     //get a messageID
     Firebase *messageRef = [[self.db childByAppendingPath:kMessageDirectory] childByAutoId];
