@@ -17,6 +17,20 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    //initialize the database info
+    self.db = [[Firebase alloc] initWithUrl:@"https://cse535-project.firebaseio.com/"];
+    
+    // Init location manager
+    self.locationManager = [[CLLocationManager alloc] init];
+    [self.locationManager requestWhenInUseAuthorization];
+    self.locationManager.delegate = self;
+    self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    [self.locationManager startUpdatingLocation];
+    
+    //configure the timer
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(timerFired:) userInfo:Nil repeats:YES];
+    
     return YES;
 }
 
@@ -40,6 +54,90 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+
+#pragma mark - timer response
+
+-(void)timerFired:(NSTimer *)timer
+{
+    [self updateUserLocation];
+}
+
+- (void)updateUserLocation {
+    
+    //if the user hasn't logged in then we can't track their location...
+    if(!(_userId && _currentUserInfo)) return;
+    
+    NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
+    
+    // Saving the location
+    NSNumber *lon = [[NSNumber alloc] initWithDouble:self.locationManager.location.coordinate.longitude];
+    NSNumber *lat = [[NSNumber alloc] initWithDouble:self.locationManager.location.coordinate.latitude];
+    message[@"lat"] = lat;
+    message[@"lon"] = lon;
+    
+    // Saving the message
+    message[@"timestamp"] = [[NSDate new] description];
+    message[@"username"] = self.currentUserInfo[@"email"];
+    
+    //get a messageID
+    Firebase *messageRef = [[self.db childByAppendingPath:kUserLocationsDirectory] childByAppendingPath:self.userId];
+    
+    // Putting it up to Firebase
+    [messageRef setValue:message];
+    
+}
+
+#pragma mark - CLLocationManagerDelegate
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    NSLog(@"Location %@", @([CLLocationManager locationServicesEnabled]));
+    if([CLLocationManager locationServicesEnabled])
+    {
+        UIAlertView *errorAlert = [[UIAlertView alloc]
+                                   initWithTitle:@"Error" message:@"Location service is not turned on. Please go to settings to turn location service on for this app." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [errorAlert show];
+    }
+    
+    else
+    {
+        UIAlertView *errorAlert = [[UIAlertView alloc]
+                                   initWithTitle:@"Error" message:@"Failed to Get Your Location" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [errorAlert show];
+    }
+    
+    NSLog(@"didFailWithError: %@", error);
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+    NSLog(@"didUpdateToLocation: %@", newLocation);
+}
+
+#pragma mark - Custom Setters
+//if the user logs in (and we acquire their credentials) update our db connection
+-(void)setUserId:(NSString *)userId
+{
+    _userId = userId;
+    
+    if(_userId && _currentUserInfo)
+    {
+        [[[self.db childByAppendingPath:@"users"]
+          childByAppendingPath:self.userId] setValue:self.currentUserInfo];
+    }
+}
+
+-(void)setCurrentUserInfo:(NSDictionary *)currentUserInfo
+{
+    _currentUserInfo = currentUserInfo;
+    
+    if(_userId && _currentUserInfo)
+    {
+        [[[self.db childByAppendingPath:@"users"]
+          childByAppendingPath:self.userId] setValue:self.currentUserInfo];
+    }
 }
 
 @end

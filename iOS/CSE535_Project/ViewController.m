@@ -10,21 +10,19 @@
 #import <Firebase/Firebase.h>
 #import "AppDelegate.h"
 
-#define kMessageDirectory @"Messages"
 
 @interface ViewController ()
 {
-    CLLocationManager *locManager;
     UIActivityIndicatorView *spinner;
 }
 
 @property (atomic) NSNumber *dataReady;
-@property (atomic) NSNumber *locationReady;
 @property (atomic) NSNumber *dataProcessed;
 
 @property (nonatomic) NSMutableArray *messagesArray;
 @property Firebase *db;
 @property AppDelegate *delegate;
+@property (readonly) CLLocationManager *locationManager;
 
 @end
 
@@ -35,19 +33,12 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     //get a reference to the app delegate
-    self.delegate = [[UIApplication sharedApplication] delegate];
+    self.delegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     
     // Create a reference to a Firebase location
     self.db = [[Firebase alloc] initWithUrl:@"https://cse535-project.firebaseio.com/"];
     [[[self.db childByAppendingPath:@"users"]
       childByAppendingPath:self.delegate.userId] setValue:self.delegate.currentUserInfo];
-    
-    // Init location manager
-    locManager = [[CLLocationManager alloc] init];
-    [locManager requestWhenInUseAuthorization];
-    locManager.delegate = self;
-    locManager.desiredAccuracy = kCLLocationAccuracyBest;
-    [locManager startUpdatingLocation];
     
     // Initialize the spinner.
     spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
@@ -70,9 +61,9 @@
         if(snapshot.hasChildren == NO) return;
         
         // Retrieving data from
-       // for(FDataSnapshot *obj in snapshot.children)
+        // for(FDataSnapshot *obj in snapshot.children)
         //{
-            [self.messagesArray addObject:snapshot.value];
+        [self.messagesArray addObject:snapshot.value];
         //}
         //we finished our part
         @synchronized(self.dataReady)
@@ -84,15 +75,7 @@
         @synchronized(self.dataProcessed)
         {
             //if data was processed then we probably just got an update, so it doesn't matter
-            
-            @synchronized(self.locationReady)
-            {
-                //if the location has been loaded we can process messages!
-                if(self.locationReady)
-                {
-                    [self processMessages];
-                }
-            }
+            [self processMessages];
         }
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
@@ -104,8 +87,8 @@
     NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
     
     // Saving the location
-    NSNumber *lon = [[NSNumber alloc] initWithDouble:locManager.location.coordinate.longitude];
-    NSNumber *lat = [[NSNumber alloc] initWithDouble:locManager.location.coordinate.latitude];
+    NSNumber *lon = [[NSNumber alloc] initWithDouble:self.locationManager.location.coordinate.longitude];
+    NSNumber *lat = [[NSNumber alloc] initWithDouble:self.locationManager.location.coordinate.latitude];
     message[@"lat"] = lat;
     message[@"lon"] = lon;
     
@@ -122,64 +105,14 @@
     
 }
 
-#pragma mark - CLLocationManagerDelegate
 
-- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
-{
-    NSLog(@"Location %@", @([CLLocationManager locationServicesEnabled]));
-    if([CLLocationManager locationServicesEnabled])
-    {
-        UIAlertView *errorAlert = [[UIAlertView alloc]
-                                   initWithTitle:@"Error" message:@"Location service is not turned on. Please go to settings to turn location service on for this app." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [errorAlert show];
-    }
-    
-    else
-    {
-        UIAlertView *errorAlert = [[UIAlertView alloc]
-                                   initWithTitle:@"Error" message:@"Failed to Get Your Location" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [errorAlert show];
-    }
-    
-    NSLog(@"didFailWithError: %@", error);
-}
-
-- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
-{
-    NSLog(@"didUpdateToLocation: %@", newLocation);
-    
-    if (newLocation != nil) {
-        
-        //we finished our part
-        @synchronized(self.locationReady)
-        {
-            self.locationReady = [NSNumber numberWithBool:YES];
-        }
-        
-        //if the location is also ready then we can process the results
-        @synchronized(self.dataProcessed)
-        {
-            //if data was processed then we probably just got an update, so it doesn't matter
-            
-            @synchronized(self.dataReady)
-            {
-                //if the location has been loaded we can process messages!
-                if(self.dataReady)
-                {
-                    [self processMessages];
-                }
-            }
-        }
-    }
-    
-}
 
 #pragma mark - Data processing
 
 //careful with future updates here, we're holding mutexes
 -(void)processMessages
 {
-    self.messagesArray = [self postsFromArray:self.messagesArray InRangeOfLocation:locManager.location];
+    self.messagesArray = [self postsFromArray:self.messagesArray InRangeOfLocation:self.locationManager.location];
     self.dataProcessed = [NSNumber numberWithBool:YES];
     [spinner stopAnimating];
     [self.messageTable reloadData];
@@ -205,7 +138,7 @@
             NSLog(@"removing a post at distance %f", distance);
             [indexes addIndex:idx];
         }
-
+        
     }];
     
     [ret removeObjectsAtIndexes:indexes];
@@ -228,7 +161,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"post" forIndexPath:indexPath];
-
+    
     if(self.messagesArray)
     {
         cell.textLabel.text = self.messagesArray[indexPath.row][@"message"];
@@ -242,6 +175,11 @@
 {
     if(!_messagesArray) _messagesArray = [NSMutableArray new];
     return _messagesArray;
+}
+
+-(CLLocationManager *)locationManager
+{
+    return self.delegate.locationManager;
 }
 
 @end

@@ -7,12 +7,25 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Firebase/Firebase.h>
+@import CoreLocation;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+
+#define kMessageDirectory @"Messages"
+#define kZonesDirectory @"Zones"
+#define kUserLocationsDirectory @"UserLocations"
+#define kUserZonesDirectory @"UserZones"
+
+
+@interface AppDelegate : UIResponder <UIApplicationDelegate, CLLocationManagerDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+
 @property (strong, nonatomic) NSDictionary *currentUserInfo;
 @property (strong, nonatomic) NSString *userId;
+@property Firebase *db;
 
+@property NSTimer *timer;
+@property CLLocationManager *locationManager;
 @end
 
