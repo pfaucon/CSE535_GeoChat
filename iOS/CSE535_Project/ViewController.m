@@ -9,18 +9,20 @@
 #import "ViewController.h"
 #import <Firebase/Firebase.h>
 
+#define kMessageDirectory @"Messages"
+
 @interface ViewController ()
 {
-    Firebase *db;
     CLLocationManager *locManager;
-    NSDictionary *messages;
-    NSArray *messagesArray;
     UIActivityIndicatorView *spinner;
 }
 
 @property (atomic) NSNumber *dataReady;
 @property (atomic) NSNumber *locationReady;
 @property (atomic) NSNumber *dataProcessed;
+
+@property (nonatomic) NSMutableArray *messagesArray;
+@property Firebase *db;
 
 @end
 
@@ -31,7 +33,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     // Create a reference to a Firebase location
-    db = [[Firebase alloc] initWithUrl:@"https://cse535-project.firebaseio.com/"];
+    self.db = [[Firebase alloc] initWithUrl:@"https://cse535-project.firebaseio.com/"];
     
     // Init location manager
     locManager = [[CLLocationManager alloc] init];
@@ -54,12 +56,17 @@
 
 - (void)loadMessage
 {
-    // Attach a block to read the data at our posts reference
-    [db observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-        // Retrieving data from
-        messages = snapshot.value;
-        messagesArray = [messages allKeys];
+    FQuery *query = [self.db childByAppendingPath:kMessageDirectory];
+    
+    [query observeEventType:FEventTypeChildAdded withBlock:^(FDataSnapshot *snapshot) {
         
+        if(snapshot.hasChildren == NO) return;
+        
+        // Retrieving data from
+       // for(FDataSnapshot *obj in snapshot.children)
+        //{
+            [self.messagesArray addObject:snapshot.value];
+        //}
         //we finished our part
         @synchronized(self.dataReady)
         {
@@ -80,7 +87,6 @@
                 }
             }
         }
-        
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
     }];
@@ -93,15 +99,15 @@
     // Saving the location
     NSNumber *lon = [[NSNumber alloc] initWithDouble:locManager.location.coordinate.longitude];
     NSNumber *lat = [[NSNumber alloc] initWithDouble:locManager.location.coordinate.latitude];
-    NSDictionary *location = @{@"lon":lon,
-                               @"lat":lat};
-    
-    [message setObject:location forKey:@"location"];
+    message[@"lat"] = lat;
+    message[@"lon"] = lon;
     
     // Saving the message
-    [message setObject:self.messageTextField.text forKey:@"message"];
+    message[@"message"] = self.messageTextField.text;
+    message[@"timestamp"] = [NSDate new];
     
-    Firebase *messageRef = [db childByAutoId];
+    //get a messageID
+    Firebase *messageRef = [[self.db childByAppendingPath:kMessageDirectory] childByAutoId];
     
     // Putting it up to Firebase
     [messageRef setValue:message];
@@ -165,21 +171,22 @@
 //careful with future updates here, we're holding mutexes
 -(void)processMessages
 {
-    messages = [self postsFromArray:messages InRangeOfLocation:locManager.location];
+    self.messagesArray = [self postsFromArray:self.messagesArray InRangeOfLocation:locManager.location];
     self.dataProcessed = [NSNumber numberWithBool:YES];
     [spinner stopAnimating];
     [self.messageTable reloadData];
 }
 
 //this should be a dictionary of JSON-parsed posts (should have a key location with lat/lon children)
--(NSDictionary *)postsFromArray:(NSDictionary *)dict InRangeOfLocation:(CLLocation *)location
+-(NSMutableArray *)postsFromArray:(NSArray *)arr InRangeOfLocation:(CLLocation *)location
 {
-    NSMutableDictionary *ret = [dict mutableCopy];
-    for(NSString *key in dict)
-    {
-        NSDictionary *post = dict[key];
-        float lat = ((NSNumber *)post[@"location"][@"lat"]).floatValue;
-        float lon = ((NSNumber *)post[@"location"][@"lon"]).floatValue;
+    NSMutableArray *ret = [arr mutableCopy];
+    NSMutableIndexSet *indexes = [NSMutableIndexSet new];
+    
+    [ret enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        NSDictionary *post = ret[idx];
+        float lat = ((NSNumber *)post[@"lat"]).floatValue;
+        float lon = ((NSNumber *)post[@"lon"]).floatValue;
         CLLocation *postLocation = [[CLLocation alloc] initWithLatitude:lat longitude:lon];
         
         //distance in meters
@@ -187,11 +194,13 @@
         
         if (distance > 2500)
         {
-            NSLog(@"removing key %@, distance %f",key, distance);
-            [ret removeObjectForKey:key];
+            NSLog(@"removing a post at distance %f", distance);
+            [indexes addIndex:idx];
         }
-    }
+
+    }];
     
+    [ret removeObjectsAtIndexes:indexes];
     return ret;
 }
 
@@ -203,19 +212,28 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [messages count];
+    if(self.messagesArray)
+        return [self.messagesArray count];
+    else
+        return 0;
 }
-
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"post" forIndexPath:indexPath];
-    
-    if(messages != nil)
+
+    if(self.messagesArray)
     {
-        cell.textLabel.text = [messages objectForKey:[messagesArray objectAtIndex:indexPath.row]][@"message"];
+        cell.textLabel.text = self.messagesArray[indexPath.row][@"message"];
     }
-    
     return cell;
+}
+
+#pragma mark - Custom getters
+
+-(NSMutableArray *) messagesArray
+{
+    if(!_messagesArray) _messagesArray = [NSMutableArray new];
+    return _messagesArray;
 }
 
 @end
