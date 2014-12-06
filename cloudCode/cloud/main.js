@@ -1,96 +1,184 @@
+
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
-Parse.Cloud.define("hello", function(request, response) {
-    var result, classes = 3;
- 
-    Parse.Cloud.httpRequest({
-        method: "GET",
-        url: "https://cse535-project.firebaseio.com/.json",
-        headers: {
-            'Content-Type': "application/json"
-        },
-        success: function(httpResponse) {
-            console.log(httpResponse.text);
-            result = JSON.parse(JSON.stringify(httpResponse));
- 
-            var locationData = prepareData(result.data);
-            var em_labelvecs = [];
-            var em_class = [];
-            em_class.length = 3;
- 
-            em_prep(locationData, em_labelvecs, em_class);
- 
-            for(var i = 0; i < 5; ++i)
-            {
-                em_expect(locationData, em_labelvecs, em_class);
-                em_maximize(locationData, em_labelvecs, em_class);
-            }
- 
-            Parse.Cloud.httpRequest({
-                method: "PUT",
-                url: "https://cse535-project.firebaseio.com/emlabelvecs.json",
-                headers: { 'Content-Type': "application/json"},
-                error: function(httpResponse) {
-                    console.error('Request failed with response code ' + httpResponse.status);
-                    response.error('Request failed with response code ' + httpResponse.status);
-                },
-                body: JSON.stringify(em_labelvecs)
-            });
- 
-            Parse.Cloud.httpRequest({
-                method: "PUT",
-                url: "https://cse535-project.firebaseio.com/emclass.json",
-                headers: { 'Content-Type': "application/json"},
-                error: function(httpResponse) {
-                    console.error('Request failed with response code ' + httpResponse.status);
-                    response.error('Request failed with response code ' + httpResponse.status);
-                },
-                body: JSON.stringify(em_class)
-            });
- 
-            response.success(em_labelvecs);
-        },
-        error: function(httpResponse) {
-            console.error('Request failed with response code ' + httpResponse.status);
-            response.error('Request failed with response code ' + httpResponse.status);
-        }
-    });
+Parse.Cloud.define("calcZones", function(request, response) {
+	var result, classes = 3;
+
+  // Temp fix before data are back
+  // var em_labelvecs = [];
+  // var em_class = [[[18.08502,100.13311],[0,0,0,0]],[[18.08502,100.13310999999999],[0.000000000000010309249316544401,-0.0000000000001425547062023402,-0.0000000000001425547062023402,0.0000000000019712244569432748]],[[33.32922950894912,-111.97545953336116],[0.01649107358090631,-0.00439662449368675,-0.00439662449368675,0.0034009854330863645]]];
+  // returnResult = [em_labelvecs, em_class];
+
+  // response.success(returnResult);
+
+ /******** Uncomment the following after data are fix. ******/
+	Parse.Cloud.httpRequest({
+		method: "GET",
+		url: "https://cse535-project.firebaseio.com/.json",
+		headers: {
+			'Content-Type': "application/json"
+		},
+		success: function(httpResponse) {
+			result = JSON.parse(JSON.stringify(httpResponse));
+
+			var locationData = prepareData(result.data);
+			var em_labelvecs = [];
+			var em_class = [];
+      console.log("location data");
+      console.log(locationData);
+			em_class.length = 3;
+
+			em_prep(locationData, em_labelvecs, em_class);
+
+			for(var i = 0; i < 5; ++i)
+			{
+			 	em_expect(locationData, em_labelvecs, em_class);
+				em_maximize(locationData, em_labelvecs, em_class);
+			}
+
+      returnResult = [em_labelvecs, em_class];
+
+      response.success(returnResult);
+		},
+		error: function(httpResponse) {
+			console.error('Request failed with response code ' + httpResponse.status);
+			response.error('Request failed with response code ' + httpResponse.status);
+		}
+	});
 });
- 
+
+Parse.Cloud.define("namingZones", function(request, response) {
+  var name;
+  var placesAPIKey = "AIzaSyDk7SMts1mkbF2u0WQSrSle2EYuGIzC69I";
+  var radius = 50;
+  // var url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&type=university|school|establishment&location=" + request.params.location.lat + "," + request.params.location.lon + "&radius=" + radius + "&key=" + placesAPIKey;
+  var em_class = request.params.em_class;
+
+  console.log("em_class");
+  console.log(em_class);
+
+  for(var i = 0; i < 2; i++)
+  {
+    var currLoc = em_class[i];
+    var lat = currLoc[0][0];
+    var lon = currLoc[0][1];
+    var covar_xx = currLoc[1][0];
+    var covar_yy = currLoc[1][1];
+    var covar_xy = currLoc[1][2];
+
+    var name = encodeURIComponent("zone" + i);
+    var zone = {
+      "lat" : lat, 
+      "lon" : lon, 
+      "covar_xx" : covar_xx, 
+      "covar_yy" : covar_yy, 
+      "covar_xy" : covar_xy
+    }; 
+
+    console.log(name);
+    console.log(zone);
+
+    Parse.Cloud.httpRequest({
+      method: "PUT",
+      url: "https://cse535-project.firebaseio.com/zones/" + name + ".json",
+      headers: { 'Content-Type': "application/json"},
+      error: function(httpResponse) {
+        console.error('Firebase: Request failed with response code ' + httpResponse.status);
+        response.error('Firebase: Request failed with response code ' + httpResponse.status);
+      },
+      body: JSON.stringify(zone)
+    });
+
+    cropped.save();
+  }
+
+  response.success(em_class);
+
+});
+
+
+/*********** Working code, temporary comenting out. ***************/
+/****** Could be useful in the future, semi-working code for Google Places API ***********/
+// Parse.Cloud.define("namingZones", function(request, response) {
+//   var name;
+//   var placesAPIKey = "AIzaSyDk7SMts1mkbF2u0WQSrSle2EYuGIzC69I";
+//   var radius = 50;
+//   var url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&type=university|school|establishment&location=" + request.params.location.lat + "," + request.params.location.lon + "&radius=" + radius + "&key=" + placesAPIKey;
+
+//   Parse.Cloud.httpRequest({
+//     method: "GET",
+//     url: url,
+//     headers: {
+//       'Content-Type': "application/json"
+//     },
+//     success: function(httpResponse) {
+//       console.log(httpResponse);
+//       if(httpResponse.data.status == "OK")
+//       {
+//         if(httpResponse.data.results[1])
+//         {
+//           result = httpResponse.data.results[1].name;
+//         }
+
+//         else
+//         {
+//           result = httpResponse.data.results[0].name;
+//         }
+//       }
+
+//       else
+//       {
+//         result = "Error: No Places Found";
+//       }
+
+//       response.success(result);
+//     },
+//     error: function(httpResponse) {
+//       console.error('Google Places API: Request failed with response code ' + httpResponse.status);
+//       response.error('Google Places API: Request failed with response code ' + httpResponse.status);
+//     }
+//   });
+// });
+
+// {"-J_EP6ocd_FEuzBRUhHf":{"location":{"lat":33.4233,"lon":-111.939},"message":"CSE 535 Project"},"-J_JCb2zVaYZGz0Ruxvc":{"location":{"lat":18.08502,"lon":100.13311},"message":"Go Devils"},"-J_JE3XPGXeECaWKJtVr":{"location":{"lat":33.42057549033575,"lon":-111.935760159038},"message":"Arizona State University"},"-J_MZ4fD_B4mzsQWNc1e":{"location":{"lat":33.45276928975569,"lon":-112.0671806485504},"message":"John"},"-J_MZ4fSmXl9QayMgFsF":{"location":{"lat":33.45276928975569,"lon":-112.0671806485504},"message":"Nic"},"-JaHapBQPZpZlTxbJ0Zm":{"location":{"lat":33.20080802797657,"lon":-111.9270634745359},"message":"Christophe "},"-JbBI3azSbmj6lfut9OB":{"location":{"lat":33.22717858500166,"lon":-111.9460354094505},"message":"Harsh"},"-JbDwnQeU_kfZfRra_XQ":{"location":{"lat":33.12720587981847,"lon":-111.945996393403},"message":"Phase II"},"Messages":{"-Jc2elabmuiMy2FrdcPT":{"lat":33.42336778330905,"lon":-111.9396456740265,"message":"messages!"},"-Jc2fVDYDVzfvuNyzRL2":{"lat":33.42338254943569,"lon":-111.9397250103069,"message":"hello"},"-Jc2fXzcZDhPM64Qvm3o":{"lat":33.42338262281073,"lon":-111.9397250162667,"message":"hello"},"-Jc2farXYI3N9jLo_CEa":{"lat":33.42329823158933,"lon":-111.9396141109248,"message":"hello"},"-Jc2g68OUBeMOBwuGAgw":{"lat":33.42325918393763,"lon":-111.9395428913665,"message":"Christophe "},"-Jc2hMCha2UhLVaS9igx":{"lat":33.42326990048157,"lon":-111.9395735300484,"message":"test "}}}
+
 function prepareData(rawData)
 {
-    var result = [];
-    var i = 0; // Counter
- 
-    for (var key in rawData) 
-    {
-        if (rawData.hasOwnProperty(key)) 
-        {
-            temp = [];
-            temp[0] = rawData[key]["location"]["lat"];
-            temp[1] = rawData[key]["location"]["lon"];
-            result[i] = temp;
- 
-            ++i;
-        }
-    }
- 
-    return result;
+	var result = [];
+	var i = 0; // Counter
+
+	for (var key in rawData) 
+	{
+		if (rawData.hasOwnProperty(key)) 
+		{
+      if (rawData[key].hasOwnProperty("location")) 
+      {
+  			temp = [];
+  			temp[0] = rawData[key]["location"]["lat"];
+  			temp[1] = rawData[key]["location"]["lon"];
+   			result[i] = temp;
+      }
+
+ 			++i;
+		}
+	}
+
+	return result;
 }
- 
+
 function myFunction(p1) {
-    var result = {};
-    for (var key in p1) {
-        if (p1.hasOwnProperty(key)) {
-            if(p1[key]["location"]["lat"] > 33 && p1[key]["location"]["lat"] < 33.43)
-            {
-                result[key] = p1[key];
-            }
-        }
-    }
+	var result = {};
+	for (var key in p1) {
+		if (p1.hasOwnProperty(key)) {
+			if(p1[key]["location"]["lat"] > 33 && p1[key]["location"]["lat"] < 33.43)
+			{
+				result[key] = p1[key];
+			}
+		}
+	}
     return result ;
 }
- 
+
 function em_maximize(data, labelvecs, classes) {
   for(var cc = 0; cc < classes.length; ++cc) {
     var sum = [0,0];
@@ -101,7 +189,7 @@ function em_maximize(data, labelvecs, classes) {
       sum[1] += p * data[dd][1];
       num += p;
     }
-     
+    
     var mean = [sum[0]/num, sum[1]/num];
     var xx = 0, yy = 0, xy = 0;
     for(var dd = 0; dd < data.length; ++dd) {
@@ -110,24 +198,24 @@ function em_maximize(data, labelvecs, classes) {
       xx += rel[0]*rel[0] * p;
       xy += rel[0]*rel[1] * p;
       yy += rel[1]*rel[1] * p;
- 
+
     }
     xx /= num;
     xy /= num;
     yy /= num;
-     
+    
     var cov = [xx, xy, xy, yy];
-     
+    
     classes[cc][0] = mean;
     classes[cc][1] = cov;
   }  
 }
- 
+
 function em_expect(data, labelvecs, classes) {
   // data: array of v2 points
   // labelvecs: probabilistic assignment of data to classes
   // classes: each is a [v2, m22]
-   
+  
   // This is described in:
   // http://en.wikipedia.org/wiki/Multivariate_normal_distribution
   // 
@@ -144,7 +232,7 @@ function em_expect(data, labelvecs, classes) {
       labelvecs[dd][cc] = p;
     }
   }
- 
+
   // Now normalize so each datum has probability 1.0.
   // Also label each one as its current most likely class.
   for(var dd = 0; dd < data.length; ++dd) {
@@ -164,7 +252,7 @@ function em_expect(data, labelvecs, classes) {
     }
   }
 }
- 
+
 function em_prep(data, labelvecs, classes) {
   for(var dd = labelvecs.length; dd < data.length; ++dd) {
     labelvecs[dd] = [];
@@ -183,7 +271,7 @@ function em_prep(data, labelvecs, classes) {
     classes[cc][1] = [s, 0, 0, s];
   }
 }
- 
+
 function v2_rand() { return [1-2*Math.random(), 1-2*Math.random()]; }
 function v2_zero() { return [0,0]; }
 function v2_add_v2(a,b) { return [a[0]+b[0],a[1]+b[1]]; }
@@ -196,15 +284,15 @@ function v2_dist_v2(a,b) {
   var dy = a[1]-b[1];
   return Math.sqrt(dx*dx+dy*dy);
 }
- 
+
 // 2x2 matrix stored in a 4-element array, column major.
 // [ 0 2 ]
 // [ 1 3 ]
- 
+
 function m22_ident() { return [1, 0, 0, 1]; }
- 
+
 function v2_mul_m22(v,m) { return [v[0]*m[0]+v[1]*m[2], v[0]*m[1]+v[1]*m[3]]; }
- 
+
 function m22_mul_m22(m,n) {
   return [m[0]*n[0]+m[1]*n[2],
           m[0]*n[1]+m[1]*n[3],
@@ -212,14 +300,14 @@ function m22_mul_m22(m,n) {
           m[2]*n[1]+m[3]*n[3]];
 }
 function m22_transpose(m) { return [m[0], m[2], m[1], m[3]]; }
- 
+
 function m22_det(m) { return m[0]*m[3]-m[1]*m[2]; }
- 
+
 function m22_invert(m) {
   var d = m22_det(m);
   return [m[3]/d, -m[1]/d, -m[2]/d, m[0]/d];
 }
- 
+
 // 2x2 Cholesky Decomposition.  A trick for drawing ellipses
 function m22_chol(m) {
   var sra = Math.sqrt(m[0]);

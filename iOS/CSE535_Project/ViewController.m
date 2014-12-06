@@ -116,6 +116,8 @@
     self.dataProcessed = [NSNumber numberWithBool:YES];
     [spinner stopAnimating];
     [self.messageTable reloadData];
+    [self.messageTextField resignFirstResponder];
+    self.messageTextField.text = @"";
 }
 
 //this should be a dictionary of JSON-parsed posts (should have a key location with lat/lon children)

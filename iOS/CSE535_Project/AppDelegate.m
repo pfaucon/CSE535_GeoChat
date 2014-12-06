@@ -31,6 +31,28 @@
     //configure the timer
     self.timer = [NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(timerFired:) userInfo:Nil repeats:YES];
     
+    [Parse setApplicationId:@"FcA36waByxhXX3j7U58EfTWYtNmkMryH8kml4hvU"
+                  clientKey:@"VF72A1Tgppe9ubr8cibkoXa4HEyauTRHSuuUfxs2"];
+    
+    [PFCloud callFunctionInBackground:@"calcZones"
+                       withParameters:@{}
+                                block:^(id result, NSError *error) {
+                                    if (!error) {
+                                        NSArray *em_class = result[1];
+                                        [PFCloud callFunctionInBackground:@"namingZones"
+                                                           withParameters:@{@"em_class": em_class}
+                                                                    block:^(id result, NSError *error) {
+                                                                        if (!error) {
+                                                                            // ratings is 4.5
+                                                                        }
+                                                                    }];
+                                    }
+                                    else
+                                    {
+                                        NSLog(@"Cloud Code Error: %@", error);
+                                    }
+                                }];
+    
     return YES;
 }
 
