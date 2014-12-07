@@ -4,22 +4,16 @@
 Parse.Cloud.define("calcZones", function(request, response) {
 	var result, classes = 3;
 
-  // Temp fix before data are back
-  // var em_labelvecs = [];
-  // var em_class = [[[18.08502,100.13311],[0,0,0,0]],[[18.08502,100.13310999999999],[0.000000000000010309249316544401,-0.0000000000001425547062023402,-0.0000000000001425547062023402,0.0000000000019712244569432748]],[[33.32922950894912,-111.97545953336116],[0.01649107358090631,-0.00439662449368675,-0.00439662449368675,0.0034009854330863645]]];
-  // returnResult = [em_labelvecs, em_class];
-
-  // response.success(returnResult);
-
- /******** Uncomment the following after data are fix. ******/
 	Parse.Cloud.httpRequest({
 		method: "GET",
-		url: "https://cse535-project.firebaseio.com/.json",
+		url: "https://cse535-project.firebaseio.com/Messages.json",
 		headers: {
 			'Content-Type': "application/json"
 		},
 		success: function(httpResponse) {
 			result = JSON.parse(JSON.stringify(httpResponse));
+      console.log("result")
+      console.log(result.data);
 
 			var locationData = prepareData(result.data);
 			var em_labelvecs = [];
@@ -36,7 +30,7 @@ Parse.Cloud.define("calcZones", function(request, response) {
 				em_maximize(locationData, em_labelvecs, em_class);
 			}
 
-      returnResult = [em_labelvecs, em_class];
+      returnResult = [em_labelvecs, em_class, locationData];
 
       response.success(returnResult);
 		},
@@ -47,100 +41,61 @@ Parse.Cloud.define("calcZones", function(request, response) {
 	});
 });
 
-Parse.Cloud.define("namingZones", function(request, response) {
-  var name;
-  var placesAPIKey = "AIzaSyDk7SMts1mkbF2u0WQSrSle2EYuGIzC69I";
-  var radius = 50;
-  // var url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&type=university|school|establishment&location=" + request.params.location.lat + "," + request.params.location.lon + "&radius=" + radius + "&key=" + placesAPIKey;
+Parse.Cloud.define("nameZones", function(request, response) {
+  var _ = require('underscore');
   var em_class = request.params.em_class;
 
   console.log("em_class");
   console.log(em_class);
 
-  for(var i = 0; i < 2; i++)
+  var promises = [];
+  var zones = [];
+
+  // Using Underscore.js to interate through em_class, it's just a simple form of a for-loop
+  _.each(em_class, function(aClass,i)
   {
-    var currLoc = em_class[i];
-    var lat = currLoc[0][0];
-    var lon = currLoc[0][1];
-    var covar_xx = currLoc[1][0];
-    var covar_yy = currLoc[1][1];
-    var covar_xy = currLoc[1][2];
+    // Putting calls to the JavaScript nameZones function in promise.
+    promises.push(zones[i] = nameZones(aClass, i));
+  });
 
-    var name = encodeURIComponent("zone" + i);
-    var zone = {
-      "lat" : lat, 
-      "lon" : lon, 
-      "covar_xx" : covar_xx, 
-      "covar_yy" : covar_yy, 
-      "covar_xy" : covar_xy
-    }; 
-
-    console.log(name);
-    console.log(zone);
-
-    Parse.Cloud.httpRequest({
-      method: "PUT",
-      url: "https://cse535-project.firebaseio.com/zones/" + name + ".json",
-      headers: { 'Content-Type': "application/json"},
-      error: function(httpResponse) {
-        console.error('Firebase: Request failed with response code ' + httpResponse.status);
-        response.error('Firebase: Request failed with response code ' + httpResponse.status);
-      },
-      body: JSON.stringify(zone)
-    });
-
-    cropped.save();
-  }
-
-  response.success(em_class);
-
+  // Executing all the entries in the promise.
+  Parse.Promise.when(promises).then(response.success(zones));
 });
 
+function nameZones(aClass, i)
+{
+  var currLoc = aClass;
+  var lat = currLoc[0][0];
+  var lon = currLoc[0][1];
+  var covar_xx = currLoc[1][0];
+  var covar_yy = currLoc[1][1];
+  var covar_xy = currLoc[1][2];
 
-/*********** Working code, temporary comenting out. ***************/
-/****** Could be useful in the future, semi-working code for Google Places API ***********/
-// Parse.Cloud.define("namingZones", function(request, response) {
-//   var name;
-//   var placesAPIKey = "AIzaSyDk7SMts1mkbF2u0WQSrSle2EYuGIzC69I";
-//   var radius = 50;
-//   var url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&type=university|school|establishment&location=" + request.params.location.lat + "," + request.params.location.lon + "&radius=" + radius + "&key=" + placesAPIKey;
+  var name = encodeURIComponent("zone" + i);
+  var zone = {
+    "lat" : lat, 
+    "lon" : lon, 
+    "covar_xx" : covar_xx, 
+    "covar_yy" : covar_yy, 
+    "covar_xy" : covar_xy
+  }; 
 
-//   Parse.Cloud.httpRequest({
-//     method: "GET",
-//     url: url,
-//     headers: {
-//       'Content-Type': "application/json"
-//     },
-//     success: function(httpResponse) {
-//       console.log(httpResponse);
-//       if(httpResponse.data.status == "OK")
-//       {
-//         if(httpResponse.data.results[1])
-//         {
-//           result = httpResponse.data.results[1].name;
-//         }
+  console.log(name);
+  console.log(zone);
 
-//         else
-//         {
-//           result = httpResponse.data.results[0].name;
-//         }
-//       }
+  Parse.Cloud.httpRequest({
+    method: "PUT",
+    url: "https://cse535-project.firebaseio.com/zones/" + name + ".json",
+    headers: { 'Content-Type': "application/json"},
+    error: function(httpResponse) {
+      console.error('Firebase: Request failed with response code ' + httpResponse.status);
+      response.error('Firebase: Request failed with response code ' + httpResponse.status);
+    },
+    body: JSON.stringify(zone)
+  });
 
-//       else
-//       {
-//         result = "Error: No Places Found";
-//       }
-
-//       response.success(result);
-//     },
-//     error: function(httpResponse) {
-//       console.error('Google Places API: Request failed with response code ' + httpResponse.status);
-//       response.error('Google Places API: Request failed with response code ' + httpResponse.status);
-//     }
-//   });
-// });
-
-// {"-J_EP6ocd_FEuzBRUhHf":{"location":{"lat":33.4233,"lon":-111.939},"message":"CSE 535 Project"},"-J_JCb2zVaYZGz0Ruxvc":{"location":{"lat":18.08502,"lon":100.13311},"message":"Go Devils"},"-J_JE3XPGXeECaWKJtVr":{"location":{"lat":33.42057549033575,"lon":-111.935760159038},"message":"Arizona State University"},"-J_MZ4fD_B4mzsQWNc1e":{"location":{"lat":33.45276928975569,"lon":-112.0671806485504},"message":"John"},"-J_MZ4fSmXl9QayMgFsF":{"location":{"lat":33.45276928975569,"lon":-112.0671806485504},"message":"Nic"},"-JaHapBQPZpZlTxbJ0Zm":{"location":{"lat":33.20080802797657,"lon":-111.9270634745359},"message":"Christophe "},"-JbBI3azSbmj6lfut9OB":{"location":{"lat":33.22717858500166,"lon":-111.9460354094505},"message":"Harsh"},"-JbDwnQeU_kfZfRra_XQ":{"location":{"lat":33.12720587981847,"lon":-111.945996393403},"message":"Phase II"},"Messages":{"-Jc2elabmuiMy2FrdcPT":{"lat":33.42336778330905,"lon":-111.9396456740265,"message":"messages!"},"-Jc2fVDYDVzfvuNyzRL2":{"lat":33.42338254943569,"lon":-111.9397250103069,"message":"hello"},"-Jc2fXzcZDhPM64Qvm3o":{"lat":33.42338262281073,"lon":-111.9397250162667,"message":"hello"},"-Jc2farXYI3N9jLo_CEa":{"lat":33.42329823158933,"lon":-111.9396141109248,"message":"hello"},"-Jc2g68OUBeMOBwuGAgw":{"lat":33.42325918393763,"lon":-111.9395428913665,"message":"Christophe "},"-Jc2hMCha2UhLVaS9igx":{"lat":33.42326990048157,"lon":-111.9395735300484,"message":"test "}}}
+  return zone;
+}
 
 function prepareData(rawData)
 {
@@ -151,13 +106,10 @@ function prepareData(rawData)
 	{
 		if (rawData.hasOwnProperty(key)) 
 		{
-      if (rawData[key].hasOwnProperty("location")) 
-      {
-  			temp = [];
-  			temp[0] = rawData[key]["location"]["lat"];
-  			temp[1] = rawData[key]["location"]["lon"];
-   			result[i] = temp;
-      }
+			temp = [];
+			temp[0] = rawData[key]["lat"];
+			temp[1] = rawData[key]["lon"];
+ 			result[i] = temp;
 
  			++i;
 		}
@@ -313,3 +265,48 @@ function m22_chol(m) {
   var sra = Math.sqrt(m[0]);
   return [sra,0,m[1]/sra,Math.sqrt(m[3]-m[1]*m[1]/m[0])];
 }
+
+/*********** Working code, temporary comenting out. ***************/
+/****** Could be useful in the future, semi-working code for Google Places API ***********/
+// Parse.Cloud.define("namingZones", function(request, response) {
+//   var name;
+//   var placesAPIKey = "AIzaSyDk7SMts1mkbF2u0WQSrSle2EYuGIzC69I";
+//   var radius = 50;
+//   var url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&type=university|school|establishment&location=" + request.params.location.lat + "," + request.params.location.lon + "&radius=" + radius + "&key=" + placesAPIKey;
+
+//   Parse.Cloud.httpRequest({
+//     method: "GET",
+//     url: url,
+//     headers: {
+//       'Content-Type': "application/json"
+//     },
+//     success: function(httpResponse) {
+//       console.log(httpResponse);
+//       if(httpResponse.data.status == "OK")
+//       {
+//         if(httpResponse.data.results[1])
+//         {
+//           result = httpResponse.data.results[1].name;
+//         }
+
+//         else
+//         {
+//           result = httpResponse.data.results[0].name;
+//         }
+//       }
+
+//       else
+//       {
+//         result = "Error: No Places Found";
+//       }
+
+//       response.success(result);
+//     },
+//     error: function(httpResponse) {
+//       console.error('Google Places API: Request failed with response code ' + httpResponse.status);
+//       response.error('Google Places API: Request failed with response code ' + httpResponse.status);
+//     }
+//   });
+// });
+
+// {"-J_EP6ocd_FEuzBRUhHf":{"location":{"lat":33.4233,"lon":-111.939},"message":"CSE 535 Project"},"-J_JCb2zVaYZGz0Ruxvc":{"location":{"lat":18.08502,"lon":100.13311},"message":"Go Devils"},"-J_JE3XPGXeECaWKJtVr":{"location":{"lat":33.42057549033575,"lon":-111.935760159038},"message":"Arizona State University"},"-J_MZ4fD_B4mzsQWNc1e":{"location":{"lat":33.45276928975569,"lon":-112.0671806485504},"message":"John"},"-J_MZ4fSmXl9QayMgFsF":{"location":{"lat":33.45276928975569,"lon":-112.0671806485504},"message":"Nic"},"-JaHapBQPZpZlTxbJ0Zm":{"location":{"lat":33.20080802797657,"lon":-111.9270634745359},"message":"Christophe "},"-JbBI3azSbmj6lfut9OB":{"location":{"lat":33.22717858500166,"lon":-111.9460354094505},"message":"Harsh"},"-JbDwnQeU_kfZfRra_XQ":{"location":{"lat":33.12720587981847,"lon":-111.945996393403},"message":"Phase II"},"Messages":{"-Jc2elabmuiMy2FrdcPT":{"lat":33.42336778330905,"lon":-111.9396456740265,"message":"messages!"},"-Jc2fVDYDVzfvuNyzRL2":{"lat":33.42338254943569,"lon":-111.9397250103069,"message":"hello"},"-Jc2fXzcZDhPM64Qvm3o":{"lat":33.42338262281073,"lon":-111.9397250162667,"message":"hello"},"-Jc2farXYI3N9jLo_CEa":{"lat":33.42329823158933,"lon":-111.9396141109248,"message":"hello"},"-Jc2g68OUBeMOBwuGAgw":{"lat":33.42325918393763,"lon":-111.9395428913665,"message":"Christophe "},"-Jc2hMCha2UhLVaS9igx":{"lat":33.42326990048157,"lon":-111.9395735300484,"message":"test "}}}

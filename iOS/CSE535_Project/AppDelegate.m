@@ -39,11 +39,13 @@
                                 block:^(id result, NSError *error) {
                                     if (!error) {
                                         NSArray *em_class = result[1];
-                                        [PFCloud callFunctionInBackground:@"namingZones"
+                                        NSLog(@"Location: %@", result[2]);
+                                        
+                                        [PFCloud callFunctionInBackground:@"nameZones"
                                                            withParameters:@{@"em_class": em_class}
                                                                     block:^(id result, NSError *error) {
                                                                         if (!error) {
-                                                                            // ratings is 4.5
+                                                                            NSLog(@"Zones: %@", result);
                                                                         }
                                                                     }];
                                     }
