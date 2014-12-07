@@ -22,17 +22,26 @@ Parse.Cloud.define("calcZones", function(request, response) {
       console.log(locationData);
 			em_class.length = 3;
 
-			em_prep(locationData, em_labelvecs, em_class);
+			em_prep(locationData[0], em_labelvecs, em_class);
 
-			for(var i = 0; i < 5; ++i)
+			for(var i = 0; i < 10; ++i)
 			{
-			 	em_expect(locationData, em_labelvecs, em_class);
-				em_maximize(locationData, em_labelvecs, em_class);
+			 	em_expect(locationData[0], em_labelvecs, em_class);
+				em_maximize(locationData[0], em_labelvecs, em_class);
 			}
 
-      returnResult = [em_labelvecs, em_class, locationData];
+      returnResult = [em_labelvecs, em_class, locationData[0], locationData[1]];
 
-      response.success(returnResult);
+      console.log("Calling zoneMessages");
+
+      Parse.Cloud.run('zoneMessages', {em_labelvecs:em_labelvecs, keys:locationData[1], orgData:result.data}, {
+        success: function(ratings) {
+          console.log("Came back to calcZones");
+        },
+        error: function(error) {
+          console.error('Error calling zoneMessages ' + httpResponse.status);
+        }
+      }).then(response.success(returnResult));
 		},
 		error: function(httpResponse) {
 			console.error('Request failed with response code ' + httpResponse.status);
@@ -85,7 +94,7 @@ function nameZones(aClass, i)
 
   Parse.Cloud.httpRequest({
     method: "PUT",
-    url: "https://cse535-project.firebaseio.com/zones/" + name + ".json",
+    url: "https://cse535-project.firebaseio.com/Zones/" + name + ".json",
     headers: { 'Content-Type': "application/json"},
     error: function(httpResponse) {
       console.error('Firebase: Request failed with response code ' + httpResponse.status);
@@ -97,12 +106,68 @@ function nameZones(aClass, i)
   return zone;
 }
 
+Parse.Cloud.define("zoneMessages", function(request, response) {
+  var _ = require('underscore');
+  var em_labelvecs = request.params.em_labelvecs;
+  var keys = request.params.keys;
+  var orgData = request.params.orgData;
+
+  console.log("zoneMessages started");
+
+  var promises = [];
+
+  for(var i = 0; i < keys.length; i++)
+  {
+    var zoneNum;
+    var maxVal = -1;
+    var message = orgData[keys[i]];
+
+    for(var j = 0; j < em_labelvecs[i].length; j++)
+    {
+      if(em_labelvecs[i][j] > maxVal)
+      {
+        zoneNum = j;
+        maxVal = em_labelvecs[i][j];
+      }
+    }
+
+    promises.push(zoneMessages(keys, zoneNum, i, message));
+  }
+
+  // Executing all the entries in the promise.
+  Parse.Promise.when(promises).then(response.success("zoneMessages Done"));
+});
+
+function zoneMessages(keys, zoneNum, i, message)
+{
+  var zoneName = "zone" + zoneNum;
+  message["zone"] = zoneName;
+
+  console.log(zoneName + " " + JSON.stringify(message) + " " + "https://cse535-project.firebaseio.com/Messages/" + keys[i] + ".json");
+  
+  Parse.Cloud.httpRequest({
+    method: "PUT",
+    url: "https://cse535-project.firebaseio.com/Messages/" + keys[i] + ".json",
+    headers: { 'Content-Type': "application/json"},
+    success: function(httpResponse){
+      console.log("Firebase zoneMessages success");
+      console.log(httpResponse);
+    },
+    error: function(httpResponse) {
+      console.error('Firebase: Request failed with response code ' + httpResponse.status);
+      response.error('Firebase: Request failed with response code ' + httpResponse.status);
+    },
+    body: JSON.stringify(message)
+  });
+}
+
 function prepareData(rawData)
 {
 	var result = [];
+  var resultKey = [];
 	var i = 0; // Counter
 
-	for (var key in rawData) 
+	for (var key in rawData)
 	{
 		if (rawData.hasOwnProperty(key)) 
 		{
@@ -111,24 +176,13 @@ function prepareData(rawData)
 			temp[1] = rawData[key]["lon"];
  			result[i] = temp;
 
+      resultKey[i] = key;
+
  			++i;
 		}
 	}
 
-	return result;
-}
-
-function myFunction(p1) {
-	var result = {};
-	for (var key in p1) {
-		if (p1.hasOwnProperty(key)) {
-			if(p1[key]["location"]["lat"] > 33 && p1[key]["location"]["lat"] < 33.43)
-			{
-				result[key] = p1[key];
-			}
-		}
-	}
-    return result ;
+	return [result, resultKey];
 }
 
 function em_maximize(data, labelvecs, classes) {
