@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>Pods-CSE535_Project-FCModel.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-CSE535_Project-FMDB.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-CSE535_Project-Firebase.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-CSE535_Project.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>3B862F54789B326565ECED88</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>88E06CE4A2D779F86DF21789</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>90FBB6447DC255036D362F2E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>CC58121D0E5F8C8F80295DA9</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
