@@ -3,3 +3,7 @@ Pods/
 *.pdf
 
 *.gz
+
+report/Final_Report.log
+
+report/Final_Report.synctex.gz
