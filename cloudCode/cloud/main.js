@@ -1,40 +1,88 @@
 
-// Use Parse.Cloud.define to define as many cloud functions as you want.
-// For example:
-Parse.Cloud.define("calcZones", function(request, response) {
-	var result, classes = 3;
+Parse.Cloud.job("calcZoneJob", function(request, status) {
+  // Set up to modify user data
+  Parse.Cloud.useMasterKey();
 
-	Parse.Cloud.httpRequest({
-		method: "GET",
-		url: "https://cse535-project.firebaseio.com/Messages.json",
-		headers: {
-			'Content-Type': "application/json"
-		},
-		success: function(httpResponse) {
-			result = JSON.parse(JSON.stringify(httpResponse));
+  Parse.Cloud.run('calcZones', {}, {
+    success: function(result) {
+      console.log("calcZones finished");
+
+      Parse.Cloud.run('nameZones', {em_class:result[1]}, {
+        success: function(ratings) {
+          console.log("nameZones finished");
+        },
+        error: function(error) {
+          console.error('Error calling zoneMessages ' + error.status);
+        }
+      });
+    },
+    error: function(error) {
+      console.error('Error calling zoneMessages ' + error.status);
+    }
+  }).then(function(result) {
+    console.log(result);
+    status.success("calcZoneJob completed successfully.");
+    // Set the job's success status
+    
+  }, function(error) {
+    // Set the job's error status
+    status.error("Uh oh, something went wrong.");
+  });
+});
+
+
+Parse.Cloud.define("calcZones", function(request, response) {
+  var result, classes = 3;
+
+  Parse.Cloud.httpRequest({
+    method: "GET",
+    url: "https://cse535-project.firebaseio.com/Messages.json",
+    headers: {
+      'Content-Type': "application/json"
+    },
+    success: function(httpResponse) {
+      result = JSON.parse(JSON.stringify(httpResponse));
       console.log("result")
       console.log(result.data);
 
-			var locationData = prepareData(result.data);
-			var em_labelvecs = [];
-			var em_class = [];
+      var locationData = prepareData(result.data);
+      var em_labelvecs = [];
+      var em_class = [];
       console.log("location data");
       console.log(locationData);
-			em_class.length = 3;
+      em_class.length = 3;
 
-			em_prep(locationData[0], em_labelvecs, em_class);
+      em_prep(locationData[0], em_labelvecs, em_class);
 
-			for(var i = 0; i < 10; ++i)
-			{
-			 	em_expect(locationData[0], em_labelvecs, em_class);
-				em_maximize(locationData[0], em_labelvecs, em_class);
-			}
+      for(var i = 0; i < 10; ++i)
+      {
+        em_expect(locationData[0], em_labelvecs, em_class);
+        em_maximize(locationData[0], em_labelvecs, em_class);
+      }
 
       returnResult = [em_labelvecs, em_class, locationData[0], locationData[1]];
 
       console.log("Calling zoneMessages");
 
-      Parse.Cloud.run('zoneMessages', {em_labelvecs:em_labelvecs, keys:locationData[1], orgData:result.data}, {
+      Parse.Cloud.run('zoneMessages', {em_labelvecs:em_labelvecs, keys:locationData[1], orgData:result.data, loopCounter:1}, {
+        success: function(ratings) {
+          console.log("Came back to calcZones");
+        },
+        error: function(error) {
+          console.error('Error calling zoneMessages ' + httpResponse.status);
+        }
+      });
+
+      Parse.Cloud.run('zoneMessages', {em_labelvecs:em_labelvecs, keys:locationData[1], orgData:result.data, loopCounter:2}, {
+        success: function(ratings) {
+          console.log("Came back to calcZones");
+        },
+        error: function(error) {
+          console.error('Error calling zoneMessages ' + httpResponse.status);
+        }
+      });
+
+      Parse.Cloud.run('zoneMessages', {em_labelvecs:em_labelvecs, keys:locationData[1], orgData:result.data, loopCounter:3}, {
         success: function(ratings) {
           console.log("Came back to calcZones");
         },
@@ -42,12 +90,12 @@ Parse.Cloud.define("calcZones", function(request, response) {
           console.error('Error calling zoneMessages ' + httpResponse.status);
         }
       }).then(response.success(returnResult));
-		},
-		error: function(httpResponse) {
-			console.error('Request failed with response code ' + httpResponse.status);
-			response.error('Request failed with response code ' + httpResponse.status);
-		}
-	});
+    },
+    error: function(httpResponse) {
+      console.error('Request failed with response code ' + httpResponse.status);
+      response.error('Request failed with response code ' + httpResponse.status);
+    }
+  });
 });
 
 Parse.Cloud.define("nameZones", function(request, response) {
@@ -111,28 +159,114 @@ Parse.Cloud.define("zoneMessages", function(request, response) {
   var em_labelvecs = request.params.em_labelvecs;
   var keys = request.params.keys;
   var orgData = request.params.orgData;
+  var loopCounter = request.params.loopCounter;
 
   console.log("zoneMessages started");
 
   var promises = [];
 
-  for(var i = 0; i < keys.length; i++)
+  if(loopCounter == 1)
   {
-    var zoneNum;
-    var maxVal = -1;
-    var message = orgData[keys[i]];
-
-    for(var j = 0; j < em_labelvecs[i].length; j++)
+    for(var i = 0; i < Math.floor(keys.length / 3); i++)
     {
-      if(em_labelvecs[i][j] > maxVal)
-      {
-        zoneNum = j;
-        maxVal = em_labelvecs[i][j];
-      }
-    }
+      var zoneNum;
+      var maxVal = -1;
+      var message = orgData[keys[i]];
 
-    promises.push(zoneMessages(keys, zoneNum, i, message));
+      for(var j = 0; j < em_labelvecs[i].length; j++)
+      {
+        if(em_labelvecs[i][j] > maxVal)
+        {
+          zoneNum = j;
+          maxVal = em_labelvecs[i][j];
+        }
+      }
+
+      promises.push(zoneMessages(keys, zoneNum, i, message));
+    }
   }
+
+  else if(loopCounter == 2)
+  {
+    for(var i = Math.floor(keys.length / 3); i < Math.floor(keys.length * (2 / 3)); i++)
+    {
+      var zoneNum;
+      var maxVal = -1;
+      var message = orgData[keys[i]];
+
+      for(var j = 0; j < em_labelvecs[i].length; j++)
+      {
+        if(em_labelvecs[i][j] > maxVal)
+        {
+          zoneNum = j;
+          maxVal = em_labelvecs[i][j];
+        }
+      }
+
+      promises.push(zoneMessages(keys, zoneNum, i, message));
+    }
+  }
+
+  else
+  {
+    for(var i = Math.floor(keys.length * (2 / 3)); i < keys.length; i++)
+    {
+      var zoneNum;
+      var maxVal = -1;
+      var message = orgData[keys[i]];
+
+      for(var j = 0; j < em_labelvecs[i].length; j++)
+      {
+        if(em_labelvecs[i][j] > maxVal)
+        {
+          zoneNum = j;
+          maxVal = em_labelvecs[i][j];
+        }
+      }
+
+      promises.push(zoneMessages(keys, zoneNum, i, message));
+    }
+  }
+
+  // for(var i = 0; i < keys.length; i++)
+  // {
+  //   var zoneNum;
+  //   var maxVal = -1;
+  //   var message = orgData[keys[i]];
+
+  //   for(var j = 0; j < em_labelvecs[i].length; j++)
+  //   {
+  //     if(em_labelvecs[i][j] > maxVal)
+  //     {
+  //       zoneNum = j;
+  //       maxVal = em_labelvecs[i][j];
+  //     }
+  //   }
+
+  //   promises.push(zoneMessages(keys, zoneNum, i, message));
+  // }
+
+  // Parse.Promise.when(promises).then(function(i, keys, em_labelvecs) {
+  //   promises = [];
+
+  //   for(; i < keys.length; i++)
+  //   {
+  //     var zoneNum;
+  //     var maxVal = -1;
+  //     var message = orgData[keys[i]];
+
+  //     for(var j = 0; j < em_labelvecs[i].length; j++)
+  //     {
+  //       if(em_labelvecs[i][j] > maxVal)
+  //       {
+  //         zoneNum = j;
+  //         maxVal = em_labelvecs[i][j];
+  //       }
+  //     }
+
+  //     promises.push(zoneMessages(keys, zoneNum, i, message));
+  //   }
+  // }).when(promises).then(response.success("zoneMessages Done"));
 
   // Executing all the entries in the promise.
   Parse.Promise.when(promises).then(response.success("zoneMessages Done"));
@@ -163,26 +297,26 @@ function zoneMessages(keys, zoneNum, i, message)
 
 function prepareData(rawData)
 {
-	var result = [];
+  var result = [];
   var resultKey = [];
-	var i = 0; // Counter
+  var i = 0; // Counter
 
-	for (var key in rawData)
-	{
-		if (rawData.hasOwnProperty(key)) 
-		{
-			temp = [];
-			temp[0] = rawData[key]["lat"];
-			temp[1] = rawData[key]["lon"];
- 			result[i] = temp;
+  for (var key in rawData)
+  {
+    if (rawData.hasOwnProperty(key)) 
+    {
+      temp = [];
+      temp[0] = rawData[key]["lat"];
+      temp[1] = rawData[key]["lon"];
+      result[i] = temp;
 
       resultKey[i] = key;
 
- 			++i;
-		}
-	}
+      ++i;
+    }
+  }
 
-	return [result, resultKey];
+  return [result, resultKey];
 }
 
 function em_maximize(data, labelvecs, classes) {
