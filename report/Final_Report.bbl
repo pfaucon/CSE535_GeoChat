@@ -21,6 +21,13 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
+\bibitem{raniwala2005architecture}
+A.~Raniwala and T.-c. Chiueh, ``Architecture and algorithms for an ieee
+  802.11-based multi-channel wireless mesh network,'' in \emph{INFOCOM 2005.
+  24th Annual Joint Conference of the IEEE Computer and Communications
+  Societies. Proceedings IEEE}, vol.~3.\hskip 1em plus 0.5em minus 0.4em\relax
+  IEEE, 2005, pp. 2223--2234.
+
 \bibitem{ray1999determination}
 S.~Ray and R.~H. Turi, ``Determination of number of clusters in k-means
   clustering and application in colour image segmentation,'' in
