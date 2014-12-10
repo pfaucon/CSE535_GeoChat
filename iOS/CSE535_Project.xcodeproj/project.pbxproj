@@ -19,6 +19,7 @@
 		52AE781319FD99880092B701 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 52AE781119FD99880092B701 /* LaunchScreen.xib */; };
 		52AE781F19FD99880092B701 /* CSE535_ProjectTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 52AE781E19FD99880092B701 /* CSE535_ProjectTests.m */; };
 		81BB9E0683A73E75FE119053 /* libPods-CSE535_Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E1437020AC9955255B9756B /* libPods-CSE535_Project.a */; };
+		CE7C5B511A37D5BA00696B7C /* ZoneSelectorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7C5B501A37D5BA00696B7C /* ZoneSelectorViewController.m */; };
 		CEEDED1D1A2C105000FFA299 /* PSRLandingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEEDED1C1A2C105000FFA299 /* PSRLandingViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -29,20 +30,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 0EFE54819FEC7DDEEB41FDE0;
 			remoteInfo = "Pods-CSE535_Project";
-		};
-		5273E9351A331143001A8BA8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5273E9141A331143001A8BA8 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 2AF9F4557917F7439DA16F59;
-			remoteInfo = "Pods-CSE535_Project-Bolts";
-		};
-		5273E9371A331143001A8BA8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5273E9141A331143001A8BA8 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F3DDD932FF4A3710571DF18B;
-			remoteInfo = "Pods-CSE535_Project-Facebook-iOS-SDK";
 		};
 		5273E9391A331143001A8BA8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -57,6 +44,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 52AE77FE19FD99880092B701;
 			remoteInfo = CSE535_Project;
+		};
+		CE7C5B4B1A37D17D00696B7C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5273E9141A331143001A8BA8 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EA8BFD5698623321C60A9138;
+			remoteInfo = "Pods-CSE535_Project-Bolts";
+		};
+		CE7C5B4D1A37D17D00696B7C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5273E9141A331143001A8BA8 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F9CA86D0023EA154FD5F1071;
+			remoteInfo = "Pods-CSE535_Project-Facebook-iOS-SDK";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -643,6 +644,8 @@
 		52AE781819FD99880092B701 /* CSE535_ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CSE535_ProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		52AE781D19FD99880092B701 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52AE781E19FD99880092B701 /* CSE535_ProjectTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSE535_ProjectTests.m; sourceTree = "<group>"; };
+		CE7C5B4F1A37D5BA00696B7C /* ZoneSelectorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZoneSelectorViewController.h; sourceTree = "<group>"; };
+		CE7C5B501A37D5BA00696B7C /* ZoneSelectorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZoneSelectorViewController.m; sourceTree = "<group>"; };
 		CEEDED1B1A2C105000FFA299 /* PSRLandingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PSRLandingViewController.h; sourceTree = "<group>"; };
 		CEEDED1C1A2C105000FFA299 /* PSRLandingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PSRLandingViewController.m; sourceTree = "<group>"; };
 		DB933A6AB5F27F132F43EBB8 /* Pods-CSE535_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CSE535_Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CSE535_Project/Pods-CSE535_Project.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1462,8 +1465,8 @@
 			isa = PBXGroup;
 			children = (
 				5273E9341A331143001A8BA8 /* libPods-CSE535_Project.a */,
-				5273E9361A331143001A8BA8 /* libPods-CSE535_Project-Bolts.a */,
-				5273E9381A331143001A8BA8 /* libPods-CSE535_Project-Facebook-iOS-SDK.a */,
+				CE7C5B4C1A37D17D00696B7C /* libPods-CSE535_Project-Bolts.a */,
+				CE7C5B4E1A37D17D00696B7C /* libPods-CSE535_Project-Facebook-iOS-SDK.a */,
 				5273E93A1A331143001A8BA8 /* libPods-CSE535_Project-Firebase.a */,
 			);
 			name = Products;
@@ -1554,6 +1557,8 @@
 				CEEDED1C1A2C105000FFA299 /* PSRLandingViewController.m */,
 				52AE780619FD99880092B701 /* AppDelegate.h */,
 				52AE780719FD99880092B701 /* AppDelegate.m */,
+				CE7C5B4F1A37D5BA00696B7C /* ZoneSelectorViewController.h */,
+				CE7C5B501A37D5BA00696B7C /* ZoneSelectorViewController.m */,
 				52AE780919FD99880092B701 /* ViewController.h */,
 				52AE780A19FD99880092B701 /* ViewController.m */,
 				52AE780C19FD99880092B701 /* Main.storyboard */,
@@ -1652,6 +1657,7 @@
 				TargetAttributes = {
 					52AE77FE19FD99880092B701 = {
 						CreatedOnToolsVersion = 6.1;
+						DevelopmentTeam = BWSLUFSJRA;
 					};
 					52AE781719FD99880092B701 = {
 						CreatedOnToolsVersion = 6.1;
@@ -1692,25 +1698,25 @@
 			remoteRef = 5273E9331A331143001A8BA8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		5273E9361A331143001A8BA8 /* libPods-CSE535_Project-Bolts.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libPods-CSE535_Project-Bolts.a";
-			remoteRef = 5273E9351A331143001A8BA8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		5273E9381A331143001A8BA8 /* libPods-CSE535_Project-Facebook-iOS-SDK.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libPods-CSE535_Project-Facebook-iOS-SDK.a";
-			remoteRef = 5273E9371A331143001A8BA8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		5273E93A1A331143001A8BA8 /* libPods-CSE535_Project-Firebase.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = "libPods-CSE535_Project-Firebase.a";
 			remoteRef = 5273E9391A331143001A8BA8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CE7C5B4C1A37D17D00696B7C /* libPods-CSE535_Project-Bolts.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-CSE535_Project-Bolts.a";
+			remoteRef = CE7C5B4B1A37D17D00696B7C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CE7C5B4E1A37D17D00696B7C /* libPods-CSE535_Project-Facebook-iOS-SDK.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-CSE535_Project-Facebook-iOS-SDK.a";
+			remoteRef = CE7C5B4D1A37D17D00696B7C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1773,6 +1779,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE7C5B511A37D5BA00696B7C /* ZoneSelectorViewController.m in Sources */,
 				52AE780B19FD99880092B701 /* ViewController.m in Sources */,
 				52AE780819FD99880092B701 /* AppDelegate.m in Sources */,
 				CEEDED1D1A2C105000FFA299 /* PSRLandingViewController.m in Sources */,
@@ -1900,6 +1907,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/parse-library-1.5.0",
@@ -1908,6 +1916,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -1917,6 +1926,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/parse-library-1.5.0",
@@ -1925,6 +1935,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

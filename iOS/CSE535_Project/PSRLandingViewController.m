@@ -56,7 +56,7 @@
         } else {
             // user is logged in, check authData for data
             
-            AppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
             appDelegate.currentUserInfo = @{
                                             @"provider": authData.provider,
                                             @"email": authData.providerData[@"email"]

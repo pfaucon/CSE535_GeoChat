@@ -52,6 +52,12 @@
     [self loadMessage];
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.title = self.zone;
+}
+
 - (void)loadMessage
 {
     FQuery *query = [self.db childByAppendingPath:kMessageDirectory];
@@ -63,7 +69,8 @@
         // Retrieving data from
         // for(FDataSnapshot *obj in snapshot.children)
         //{
-        [self.messagesArray addObject:snapshot.value];
+        if([snapshot.value[@"zone"] isEqualToString:self.zone])
+            [self.messagesArray addObject:snapshot.value];
         //}
         //we finished our part
         @synchronized(self.dataReady)
@@ -96,6 +103,7 @@
     message[@"message"] = self.messageTextField.text;
     message[@"timestamp"] = [[NSDate new] description];
     message[@"username"] = self.delegate.currentUserInfo[@"email"];
+    message[@"zone"] = self.zone;
     
     //get a messageID
     Firebase *messageRef = [[self.db childByAppendingPath:kMessageDirectory] childByAutoId];
@@ -143,7 +151,7 @@
         
     }];
     
-    [ret removeObjectsAtIndexes:indexes];
+    //[ret removeObjectsAtIndexes:indexes]; //allow all messages in the zone that we are looking at
     return ret;
 }
 
