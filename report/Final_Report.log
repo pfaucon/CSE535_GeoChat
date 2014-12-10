@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  10 DEC 2014 00:39
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  10 DEC 2014 00:49
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -350,14 +350,24 @@ Overfull \hbox (6.40288pt too wide) in paragraph at lines 11--12
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-(./conclusion.tex) [4] (./Final_Report.bbl) [5
+(./conclusion.tex) [4] (./Final_Report.bbl
+Underfull \hbox (badness 10000) in paragraph at lines 25--27
+[]\OT1/ptm/m/n/9 https://digiday.com/platforms/inside-yik-yak-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 25--27
+\OT1/ptm/m/n/9 anonymous-sharing-app-sweeping col-leges/, ``Yik
+ []
+
+) [5
 
 ] (./Final_Report.aux) ) 
 Here is how much of TeX's memory you used:
- 2925 strings out of 493117
- 45612 string characters out of 6135433
- 119173 words of memory out of 5000000
- 6346 multiletter control sequences out of 15000+600000
+ 2926 strings out of 493117
+ 45620 string characters out of 6135433
+ 119176 words of memory out of 5000000
+ 6347 multiletter control sequences out of 15000+600000
  38165 words of font info for 70 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,6n,43p,2366b,314s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -367,7 +377,7 @@ y10.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></
 usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local
 /texlive/2014/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2
 014/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Final_Report.pdf (5 pages, 473832 bytes).
+Output written on Final_Report.pdf (5 pages, 473937 bytes).
 PDF statistics:
  57 PDF objects out of 1000 (max. 8388607)
  36 compressed objects within 1 object stream
