@@ -1,20 +1,16 @@
 PODS:
-  - FCModel (0.9.0):
-    - FMDB (~> 2.1)
-  - Firebase (2.0.2)
-  - FMDB (2.4):
-    - FMDB/standard (= 2.4)
-  - FMDB/common (2.4)
-  - FMDB/standard (2.4):
-    - FMDB/common
+  - Bolts (1.1.3)
+  - Facebook-iOS-SDK (3.21.1):
+    - Bolts (~> 1.0)
+  - Firebase (2.0.3)
 
 DEPENDENCIES:
-  - FCModel
+  - Facebook-iOS-SDK
   - Firebase (>= 1.2.3)
 
 SPEC CHECKSUMS:
-  FCModel: 1f01fdcb5b469d3ab3c307ee90cb1b743cc3adfd
-  Firebase: 793a4581e4f4d9cb1e156cab89ca367f3d02b473
-  FMDB: 0b2fa25e5264ef177973c0cb8c02c711107979aa
+  Bolts: 3db0a875235e0c9042b013af13af0f00f79b102c
+  Facebook-iOS-SDK: 18c26e86ab25c17854a2ee2a8f60562099c6600f
+  Firebase: bb958f1328ab902972d4419cbec232a989b5c613
 
 COCOAPODS: 0.35.0

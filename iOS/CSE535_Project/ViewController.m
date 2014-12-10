@@ -52,6 +52,12 @@
     [self loadMessage];
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.title = self.zone;
+}
+
 - (void)loadMessage
 {
     FQuery *query = [self.db childByAppendingPath:kMessageDirectory];
@@ -96,6 +102,7 @@
     message[@"message"] = self.messageTextField.text;
     message[@"timestamp"] = [[NSDate new] description];
     message[@"username"] = self.delegate.currentUserInfo[@"email"];
+    message[@"zone"] = self.zone;
     
     //get a messageID
     Firebase *messageRef = [[self.db childByAppendingPath:kMessageDirectory] childByAutoId];

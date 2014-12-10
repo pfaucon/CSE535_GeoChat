@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "88E06CE4A2D779F86DF21789"
+               BlueprintIdentifier = "AE1C79CD2F0B632112A07057"
                BuildableName = "libPods-CSE535_Project-Firebase.a"
                BlueprintName = "Pods-CSE535_Project-Firebase"
                ReferencedContainer = "container:Pods.xcodeproj">

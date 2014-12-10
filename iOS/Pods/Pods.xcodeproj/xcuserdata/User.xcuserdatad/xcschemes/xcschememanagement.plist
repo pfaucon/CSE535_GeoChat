@@ -4,12 +4,12 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Pods-CSE535_Project-FCModel.xcscheme</key>
+		<key>Pods-CSE535_Project-Bolts.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-CSE535_Project-FMDB.xcscheme</key>
+		<key>Pods-CSE535_Project-Facebook-iOS-SDK.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -27,22 +27,22 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>3B862F54789B326565ECED88</key>
+		<key>53BE9A6D079ABFE96DD09CC0</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>88E06CE4A2D779F86DF21789</key>
+		<key>AE1C79CD2F0B632112A07057</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>90FBB6447DC255036D362F2E</key>
+		<key>BF7600F57275DCCA7C764D9A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>CC58121D0E5F8C8F80295DA9</key>
+		<key>CA4933B95FFF4FE25F1AD4F8</key>
 		<dict>
 			<key>primary</key>
 			<true/>

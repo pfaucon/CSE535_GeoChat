@@ -11,6 +11,8 @@
 
 @interface ViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 
+@property NSString *zone;
+
 @property (strong, nonatomic) IBOutlet UITextField *messageTextField;
 @property (strong, nonatomic) IBOutlet UITableView *messageTable;
 
