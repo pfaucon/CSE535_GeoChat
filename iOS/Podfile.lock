@@ -5,7 +5,7 @@ PODS:
   - Firebase (2.0.3)
 
 DEPENDENCIES:
-  - Facebook-iOS-SDK
+  - Facebook-iOS-SDK (>= 3.21.1)
   - Firebase (>= 1.2.3)
 
 SPEC CHECKSUMS:

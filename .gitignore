@@ -1,0 +1,5 @@
+Pods/
+*.xcscheme
+*.pdf
+
+*.gz
