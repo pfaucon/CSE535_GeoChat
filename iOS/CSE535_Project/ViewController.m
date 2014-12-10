@@ -69,7 +69,8 @@
         // Retrieving data from
         // for(FDataSnapshot *obj in snapshot.children)
         //{
-        [self.messagesArray addObject:snapshot.value];
+        if([snapshot.value[@"zone"] isEqualToString:self.zone])
+            [self.messagesArray addObject:snapshot.value];
         //}
         //we finished our part
         @synchronized(self.dataReady)
@@ -150,7 +151,7 @@
         
     }];
     
-    [ret removeObjectsAtIndexes:indexes];
+    //[ret removeObjectsAtIndexes:indexes]; //allow all messages in the zone that we are looking at
     return ret;
 }
 
